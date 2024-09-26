@@ -79,6 +79,53 @@ patients <- patients %>%
 
 #### Apply Bayes Theorem in Class
 
+#### Probability has disease
+
+```{r}
+patients %>%
+  tabyl(has_disease) %>%
+  adorn_percentages("col")
+```
+
+## Does have disease : P(B) = 0.001
+
+------------------------------------------------------------------------
+
+#### Probability test result is true
+
+```{r}
+patients %>%
+  tabyl(test_result) %>%
+  adorn_percentages("col")
+```
+
+## Positive test result : P(A) = 0.0112
+
+------------------------------------------------------------------------
+
+#### Likelihood having the disease given a positive test result
+
+```{r}
+patients %>%
+  tabyl(has_disease, test_result) %>%
+  adorn_percentages("row")
+```
+
+## L(B\|A) = 1.00
+
+------------------------------------------------------------------------
+
+#### POSTERIOR PROBABILITY
+
+```{r}
+B = 0.001
+A = 0.0112
+L = 1.000
+(B * L)/A
+```
+
+## P(B\|A) = 0.08928571 = 0.09 = 9%
+
 #### Video
 
 ```{r}
@@ -90,3 +137,21 @@ embed_url("https://www.youtube.com/watch?v=R13BD8qKeTg")
 $$
 P(\text{have disease} \mid \text{positive second test}) = \frac{P(\text{have disease after first positive}) \cdot P(\text{positive second test} \mid \text{have disease})}{P(\text{positive second test})}
 $$
+
+Possible ways to solve this:
+
+-   add another 9% (probably incorrect)
+
+-   add another column of subjects who have taken a second test to find P(+second test & has disease)
+
+    -   the P(+second test & has disease) would increase while the other variables stay the same
+
+-   The P(A) and the Likelihood would change based off of that p(A) which would then create a whole new posterior probability
+
+-   Breakdown
+
+    -   P(have disease after first positive) would be 9%.
+
+    -   P(positive second test) would be found logically with a different approach to the data. P(has disease is still 0.001).
+
+    -   To find P(positive second test), would include the probability of the first test being positive (0.0112) times 2, so 0.0224?
