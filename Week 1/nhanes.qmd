@@ -194,6 +194,12 @@ nhanes_data <- nhanes_data %>%
   mutate(age_bracket =ifelse(RIDAGEYR > 40, "old", "young"))
 ```
 
+```{r}
+df %>%
+  tabyl(nhanes_data, DIQ010) %>%
+  adorn_percentages("col")
+```
+
 #### Plot
 
 ```{r}
@@ -202,6 +208,34 @@ ggplot(nhanes_data, aes(x = RIDAGEYR, fill = DIQ010)) + geom_density(alpha = 0.6
 
 ### P(B\|A)
 
-B \<- has diabetes
+B \<- has diabetes. = 0.1287574
 
-A \<- Over 40
+```         
+0.1287574
+```
+
+A \<- Over 40 = 0.5342012
+
+```{r}
+nhanes_data %>%
+  tabyl(age_bracket)
+```
+
+### Likelihood a person over 40 has diabetes = 0.95588235
+
+```{r}
+nhanes_data %>%
+  tabyl(age_bracket, DIQ010) %>%
+  adorn_percentages("col")
+```
+
+### P(B\|A) = P(B)L(B\|A)/P(A)
+
+```{r}
+prob_person_has_diabetes = 0.129
+prob_person_over_40 = 0.534
+likelihood_over_40_diabetes = 0.956
+(prob_person_has_diabetes + prob_person_over_40)/likelihood_over_40_diabetes
+```
+
+The probability that someone over 40 has diabetes is 0.6935 or 69%
