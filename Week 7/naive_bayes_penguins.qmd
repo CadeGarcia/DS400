@@ -11,6 +11,7 @@ library(tidyverse)
 library(bayesrules)
 library(janitor)
 library(e1071)
+options(scipen = 99)
 ```
 
 ### Story
@@ -90,4 +91,79 @@ penguins %>%
 
 ```{r}
 naive_model_hints
+```
+
+# Lecture 2- Under the hood of Naive Bayes
+
+Species
+
+```{r}
+penguins %>%
+  tabyl(species)
+```
+
+P(adelie) \* P(adelie \| 195mm flipper) \* P(adelie \| 50mm bill length) \* P(under average weight \| adelie) = P (adelie penguin)
+
+### Adelie = 0.016
+
+```{r}
+#> Adelie flipper
+dnorm(195, mean = 189.9536, sd = 6.539457)
+```
+
+```{r}
+#> Adelie bill
+dnorm(50, mean = 38.79139, sd = 2.663405)
+```
+
+```{r}
+prob_adelie <- (152/342) * 0.04529578 * 0.999 * 0.83
+prob_adelie
+```
+
+### Chinstrap = 0.0011
+
+```{r}
+#> Chinstrap flipper
+dnorm(195, mean = 195.8235, sd = 7.131894)
+```
+
+```{r}
+#> Chinstrap bill
+dnorm(50, mean = 48.83382, sd = 3.339256)
+```
+
+```{r}
+prob_chinstrap <- (68/342) * 0.05556611 * 0.112 * 0.89
+prob_chinstrap
+```
+
+### Gentoo = ???
+
+```{r}
+#> Gentoo flipper
+dnorm(195, mean = 217.1870, sd = 6.484976)
+```
+
+```{r}
+#> Gentoo bill
+dnorm(50, mean = 47.50488, sd = 3.081857)
+```
+
+```{r}
+prob_gentoo <- (124/342) * 0.0001767016 * 0.09327 * 0.05
+prob_gentoo
+```
+
+## Sum of probabilities
+
+```{r}
+sum_of_probs <- prob_adelie + prob_chinstrap + prob_gentoo
+sum_of_probs
+```
+
+### Probability of chinstrap penguin
+
+```{r}
+prob_chinstrap / sum_of_probs
 ```
