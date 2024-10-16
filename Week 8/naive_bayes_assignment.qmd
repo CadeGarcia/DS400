@@ -17,12 +17,14 @@ library(bayesrules)
 library(tidyverse)
 library(e1071)
 library(janitor)
+options(scipen = 99)
 ```
 
 ### Read in data
 
 ```{r}
 data(fake_news)
+fake_news <- fake_news
 ```
 
 ### Challenge
@@ -37,21 +39,43 @@ Below, insert a code chunk(s) and use `ggplot` to visualize the features of the 
 
 -   Type (fake vs real)
 
--   Number of words in the title (numeric value)
+<!-- -->
 
--   Negative associations (numeric value)
+-   Number of words in the title (numeric value) - title_words
 
--   Exclamation point in the title (true vs false)
+-   Negative associations (numeric value) - negative
+
+-   Exclamation point in the title (true vs false) - title_has_excl
+
+```{r}
+ggplot(fake_news, aes(negative, title_words, color = title_has_excl)) +
+  geom_point()
+```
 
 ### Interpretation of Visualization - 2 points
 
 Below, write a few sentences explaining whether or not this ***new news article*** is true or fake solely using your visualization above
+
+#\> The chances of this new news article being real or fake is still 50-50. There are only 2 dots with a 6% negative and a 15- word title. One of them is true and the other is false. if you consider that the false has an 8% negative association, then that is less identified with our new news article and therefore our chances are much higher of it being a true article.
 
 ### Perform Naive Bayes Classification - 3 points
 
 Based on these three features (15-word title, 6% of its words have negative associations, and its title *doesn’t* have an exclamation point), utilize naive Bayes classification to calculate the posterior probability that the article is real. Do so using `naiveBayes()` with `predict()`.
 
 Below, insert the code chunks and highlight your answer
+
+```{r}
+naive_fake_news <- naiveBayes(type ~ title_words + negative + title_has_excl, data = fake_news)
+```
+
+```{r}
+new_news_article <- data.frame(title_words = 15, negative = 0.06, 
+                          title_has_excl= FALSE)
+```
+
+```{r}
+predict(naive_fake_news, newdata = new_news_article, type = "raw")
+```
 
 ### Break Down the Model - 5 points
 
@@ -75,10 +99,86 @@ Similar to the penguins example, we are going to break down the model we created
 
 Lastly divide your **`probs_real`** by the sum of **`probs_real`** and **`probs_fake`** to see if you can reproduce the output from `naiveBayes()` above
 
+```{r}
+fake_news %>%
+  tabyl(type)
+```
+
+#### Real
+
+```{r}
+#> REAL WORD TITLE
+dnorm(15, mean = 10.42222, sd = 3.204554)
+```
+
+```{r}
+#> REAL NEGATIVE ASSOCIATIONS
+dnorm(0.06, mean = 2.806556 , sd = 1.190917)
+```
+
+```{r}
+#> REAL HAS EXCLAMATION IN TITLE
+dnorm(TRUE, mean = 0.97777778, sd = 0.02222222)
+```
+
+```{r}
+#> 
+probs_real <- (0.04487606*0.0234458*10.88868)
+probs_real
+```
+
+#### Fake
+
+```{r}
+#> FAKE WORD TITLE
+dnorm(15, mean = 12.31667, sd = 1.466429)
+```
+
+```{r}
+#> FAKE NEGATIVE ASSOCIATIONS
+dnorm(0.06, mean = 3.606333, sd = 1.466429)
+```
+
+```{r}
+#> FAKE HAS EXCL
+dnorm(FALSE, mean = 0.73333333, sd = 0.26666667)
+```
+
+```{r}
+probs_fake <- (0.05100022*0.01461119*0.03410086)
+probs_fake
+```
+
+#### Naive Bayes output
+
+```{r}
+naive_output <- (probs_real + probs_fake)/ probs_real
+naive_output
+```
+
 ### Confusion Matrix - 2 points
 
 Calculate a confusion matrix by first mutating a column to fake_news called `predicted_type` . Then, use `tabyl()` to create the matrix
 
+```{r}
+fake_news <- fake_news %>%
+  mutate(predicted_news = predict(naive_fake_news, newdata = .))
+```
+
+```{r}
+fake_news %>% 
+  tabyl(type, predicted_news) %>%
+  adorn_percentages("row") %>%
+  adorn_pct_formatting(digits = 2) %>%
+  adorn_ns
+```
+
+```{r}
+naive_fake_news
+```
+
 ### How can our model be improved? - 2 points
 
 Think about the results of the confusion matrix, is the model performing well? Try creating a new model that uses all of the features in the fake_news dataset to make a prediction on type (fake vs true). Then, create a new confusion matrix to see if the model improves.
+
+----
